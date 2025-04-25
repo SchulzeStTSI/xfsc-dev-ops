@@ -2,6 +2,11 @@ name: Eclipse Dash License Scan (Maven) with Repo Info
 
 on:
   workflow_call:
+    inputs:
+      java-version:
+        required: false
+        type: string
+        default: '17'
 
 jobs:
   dash-license-maven:
@@ -16,7 +21,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'  # oder anpassen je nach Projekt
+          java-version: ${{ inputs.java-version}}
 
       - name: Generate Maven dependency list
         run: |
