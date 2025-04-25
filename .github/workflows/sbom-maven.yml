@@ -13,14 +13,13 @@ on:
         required: true
 
 jobs:
-  generate-sbom:
-    name: Java SBOM Generation
+  scan-tags:
     runs-on: ubuntu-latest
     env:
-       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      GH_TOKEN: ${{ github.token }}
+      TARGET_REPO: ${{ github.repository }}
     steps:
-      - name: Checkout repository
+      - name: Checkout central repo (for logs only)
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -28,20 +27,51 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Generate SBOM with CycloneDX Maven Plugin
+      
+      - name: Install cyclonedx-gomod
         run: |
-          mvn org.cyclonedx:cyclonedx-maven-plugin:2.7.9:makeAggregateBom \
+          go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@v1.9.0
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Get all tags from target repo
+        run: |
+          gh repo clone $TARGET_REPO temp-repo -- --quiet
+          cd temp-repo
+          git fetch --tags
+          git tag > ../tags.txt
+
+      - name: Process tags
+        run: |
+          SBOM_NAME="${{ inputs.sbom_name }}.json"
+
+          while read -r TAG; do
+            echo "🔍 Checking tag: $TAG"
+            RELEASE_INFO=$(gh release view "$TAG" -R $TARGET_REPO --json assets --jq '.assets[].name' 2>/dev/null || echo "no-release")
+
+            if [[ "$RELEASE_INFO" == "no-release" ]]; then
+              echo "⏭️ No Release for Tag $TAG. Skipping."
+              continue
+            fi
+
+            if echo "$RELEASE_INFO" | grep -q "$SBOM_NAME"; then
+              echo "✅ SBOM already exists for $TAG ($SBOM_NAME)."
+              continue
+            fi
+
+            echo "🚧 SBOM missing for $TAG. Generating..."
+            rm -rf temp-repo
+            gh repo clone $TARGET_REPO temp-repo -- --quiet
+            cd temp-repo
+            git checkout "tags/$TAG"
+
+            # SBOM erstellen
+            mvn org.cyclonedx:cyclonedx-maven-plugin:2.7.9:makeAggregateBom \
               -Dcyclonedx.outputFormat=json \
-              -Dcyclonedx.outputName=${{ inputs.sbom_name }}.json
+              -Dcyclonedx.outputName=$SBOM_NAME
 
-      - name: Upload SBOM to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ inputs.sbom_name }}.json
+            # Hochladen zum Release
+            gh release upload "$TAG" "$SBOM_NAME" -R $TARGET_REPO --clobber
+            echo "✅ SBOM for $TAG created and uploaded as $SBOM_NAME"
 
-      - name: Upload SBOM as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-java
-          path: ${{ inputs.sbom_name }}.json
+            cd ..
+          done < tags.txt
