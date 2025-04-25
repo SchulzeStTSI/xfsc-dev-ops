@@ -67,8 +67,9 @@ jobs:
             # SBOM erstellen
             mvn org.cyclonedx:cyclonedx-maven-plugin:2.7.9:makeAggregateBom \
               -Dcyclonedx.outputFormat=json \
-              -Dcyclonedx.outputName=$SBOM_NAME \
-              -Dcyclonedx.outputDirectory=.
+              -Dcyclonedx.outputName=$SBOM_NAME 
+
+            mv ./target/bom.json sbom.json
 
             # Hochladen zum Release
             gh release upload "$TAG" "$SBOM_NAME" -R $TARGET_REPO --clobber
