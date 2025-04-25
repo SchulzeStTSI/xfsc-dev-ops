@@ -1,4 +1,4 @@
-name: Universal Maven CI (Multi-POM)
+name: Universal Maven CI (Custom POM Path)
 
 on:
   workflow_call:
@@ -15,36 +15,19 @@ on:
         default: 'jib'
         type: string
 
+      folder:
+        description: 'Path to folder containing pom.xml'
+        required: false
+        default: '.'
+        type: string
+
 jobs:
-  find-poms:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Find all pom.xml files
-        id: set-matrix
-        run: |
-          echo "🔍 Searching for pom.xml files..."
-          POMS=$(find . -name 'pom.xml' ! -path './**/target/*')
-          echo "$POMS"
-
-          MATRIX=$(echo "$POMS" | sed 's|/pom.xml||' | jq -R . | jq -s '{path: .}')
-          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
-
   maven-test:
-    needs: find-poms
     runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{ fromJson(needs.find-poms.outputs.matrix) }}
-    name: Test ${{ matrix.path }}
+    name: Test ${{ inputs.folder }}
     defaults:
       run:
-        working-directory: ${{ matrix.path }}
+        working-directory: ${{ inputs.folder }}
     env:
       MAVEN_OPTS: >-
         -Dhttps.protocols=TLSv1.2
@@ -68,7 +51,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: .m2/repository
-          key: ${{ runner.os }}-m2-${{ matrix.path }}
+          key: ${{ runner.os }}-m2-${{ inputs.folder }}
           restore-keys: ${{ runner.os }}-m2-
 
       - name: Run Maven tests
@@ -77,19 +60,17 @@ jobs:
       - name: Upload Surefire Reports
         uses: actions/upload-artifact@v4
         with:
-          name: surefire-${{ matrix.path }}
+          name: surefire-${{ inputs.folder }}
           path: '**/target/surefire-reports/TEST-*.xml'
 
   maven-deploy:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
-    needs: [maven-test, find-poms]
+    needs: maven-test
     runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{ fromJson(needs.find-poms.outputs.matrix) }}
-    name: Deploy ${{ matrix.path }}
+    name: Deploy ${{ inputs.folder }}
     defaults:
       run:
-        working-directory: ${{ matrix.path }}
+        working-directory: ${{ inputs.folder }}
     env:
       MAVEN_OPTS: >-
         -Dhttps.protocols=TLSv1.2
@@ -113,7 +94,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: .m2/repository
-          key: ${{ runner.os }}-m2-${{ matrix.path }}
+          key: ${{ runner.os }}-m2-${{ inputs.folder }}
           restore-keys: ${{ runner.os }}-m2-
 
       - name: Build with Jib (Docker Image)
@@ -128,5 +109,5 @@ jobs:
         if: ${{ inputs.deploy_mode == 'jar' }}
         uses: actions/upload-artifact@v4
         with:
-          name: jar-${{ matrix.path }}
+          name: jar-${{ inputs.folder }}
           path: target/*.jar
