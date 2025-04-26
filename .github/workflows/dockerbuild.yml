@@ -51,8 +51,7 @@ jobs:
           HARBOR_CREDENTIALS: ${{ secrets.HARBOR_CREDENTIALS}}
           HARBOR_HOST: ${{ secrets.HARBOR_HOST}}
         run: |
-            tree
-            CONFIG_FILE= ${{ inputs.harbor_config }}
+            CONFIG_FILE=${{ inputs.harbor_config }}
             while IFS='=' read -r key value; do
               case "$key" in
                 PROJECT)
@@ -60,7 +59,7 @@ jobs:
                   ;;
                 USER)
                   RAW_USER="$value"  # Merken ohne robot$
-                  export HARBOR_USERNAME="robot\$${value}"  # Setze mit robot$ Präfix
+                  export HARBOR_USERNAME="robot\$${value}" 
                   ;;
               esac
             done < "$CONFIG_FILE"
