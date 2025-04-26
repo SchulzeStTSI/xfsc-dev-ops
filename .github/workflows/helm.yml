@@ -42,15 +42,15 @@ jobs:
   
           CHART_DIR="${{ inputs.buildContext}}"
           cd "$CHART_DIR"
-          tree
+          echo "Build Dependencies"
           # Helm Dependency Build
           helm dependency build
-      
+          echo "Build Chart"
           # Helm Package
           helm package .
 
           CHART_NAME=$(grep '^name:' Chart.yaml | awk '{print $2}')
     
           PACKAGE_FILE="${CHART_NAME}-*.tgz"
-
+          echo "Push Chart"
           helm push $PACKAGE_FILE oci://$HARBOR_HOST/$HARBOR_PROJECT
