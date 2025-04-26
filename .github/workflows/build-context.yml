@@ -13,13 +13,13 @@ on:
         description: "Sanitized image tag"
         value: ${{ jobs.setup.outputs.image_tag }}
       harbor_host: 
-        value: ${{ steps.harbor.outputs.harbor_host }}
+        value: ${{ jobs.setup.outputs.harbor_host }}
       harbor_project: 
-        value: ${{ steps.harbor.outputs.harbor_project }}
+        value: ${{ jobs.setup.outputs.harbor_project }}
       harbor_password: 
-        value: ${{ steps.harbor.outputs.harbor_password }}
+        value: ${{ jobs.setup.outputs.harbor_password }}
       harbor_username: 
-        value: ${{ steps.harbor.outputs.harbor_username }}
+        value: ${{ jobs.setup.outputs.harbor_username }}
 
 jobs:
   setup:
