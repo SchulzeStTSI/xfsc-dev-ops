@@ -68,7 +68,7 @@ jobs:
               exit 1
             fi
 
-            echo "HARBOR_PROJECT=$HARBOR_PROJECT" >> $GITHUB_OUTPUT
-            echo "HARBOR_USERNAME=$HARBOR_USERNAME" >> $GITHUB_OUTPUT
-            echo "HARBOR_PASSWORD=$HARBOR_PASSWORD" >> $GITHUB_OUTPUT
-            echo "HARBOR_HOST=$HARBOR_HOST" >> $GITHUB_OUTPUT
+            echo "harbor_project=$HARBOR_PROJECT" >> "$GITHUB_OUTPUT"
+            echo "harbor_username=$HARBOR_USERNAME" >>"$GITHUB_OUTPUT"
+            echo "harbor_password=$HARBOR_PASSWORD" >> "$GITHUB_OUTPUT"
+            echo "harbor_host=$HARBOR_HOST" >> "$GITHUB_OUTPUT"
