@@ -12,6 +12,26 @@ on:
         type: string
         required: false
         default: linux/amd64,linux/arm64
+      harbor_config:
+        description: 'path to harbor config'
+        type: string
+        default: "deployment/harbor.config"
+        required: false
+      dockerfile:
+        description: 'path to dockerfile'
+        type: string
+        default: "deployment/docker/Dockerfile"
+        required: false
+      service:
+        description: 'path for build'
+        type: string
+        default: "."
+        required: false
+      buildContext:
+        description: 'path for build'
+        type: string
+        default: "."
+        required: false
 
 jobs:
   setup-context:
@@ -31,7 +51,7 @@ jobs:
           HARBOR_CREDENTIALS: ${{ secrets.HARBOR_CREDENTIALS}}
           HARBOR_HOST: ${{ secrets.HARBOR_HOST}}
         run: |
-            CONFIG_FILE="deployment/harbor.config"
+            CONFIG_FILE= ${{ inputs.harbor_config }}
             while IFS='=' read -r key value; do
               case "$key" in
                 PROJECT)
@@ -77,19 +97,27 @@ jobs:
               BUILD_ARGS+="--build-arg $arg "
             done
           fi
+        
+          REPO_NAME=$(basename "$GITHUB_REPOSITORY")
+          SERVICE_NAME="${{ inputs.service }}"
+          
+          if [[ "$SERVICE_NAME" == "." ]]; then
+            FINAL_NAME="$REPO_NAME"
+          else
+            FINAL_NAME="$REPO_NAME/$SERVICE_NAME"
+          fi
 
-          find . -type f -path "*/deployment/docker/Dockerfile" | while read dockerfile; do
-            SERVICE_DIR=$(dirname "$(dirname "$dockerfile")")
-            SERVICE_NAME=$(basename "$SERVICE_DIR")
-            IMAGE="${{ secrets.HARBOR_OCI }}/${{ secrets.HARBOR_PROJECT }}/$SERVICE_NAME:$IMAGE_TAG"
+          IMAGE="${{ secrets.HARBOR_OCI }}/${{ secrets.HARBOR_PROJECT }}/$FINAL_NAME:$IMAGE_TAG"
 
-            echo "🐳 Building $SERVICE_NAME → $IMAGE"
+          echo "🐳 Building $FINAL_NAME → $IMAGE"
 
-            docker buildx build \
-              --platform "$PLATFORMS" \
-              --file "$dockerfile" \
-              $BUILD_ARGS \
-              --push \
-              --tag "$IMAGE" \
-              "$SERVICE_DIR"
-          done
+          docker buildx build \
+            --platform "$PLATFORMS" \
+            --file ${{ inputs.dockerfile}} \
+            $BUILD_ARGS \
+            --push \
+            --tag "$IMAGE" \
+            ${{ inputs.buildContext }}
+
+          docker push "$IMAGE"
+
