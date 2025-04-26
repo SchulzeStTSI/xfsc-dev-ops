@@ -2,6 +2,12 @@ name: Helm Chart Build & Push
 
 on:
   workflow_call:
+    inputs: 
+       buildContext:
+        description: 'path for build'
+        type: string
+        default: "deployment/helm"
+        required: false
 
 jobs:
   setup-context:
