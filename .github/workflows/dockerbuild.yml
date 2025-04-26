@@ -47,7 +47,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Find and build Docker images (multi-arch)
         env: 
-          HARBOR_HOST: ${{ needs.setup.outputs.harbor_host }}
+          HARBOR_HOST: ${{ secrets.HARBOR_HOST }}
           HARBOR_PROJECT: ${{ needs.setup.outputs.harbor_project }}
           HARBOR_PASSWORD: ${{ needs.setup.outputs.harbor_password }}
           HARBOR_USERNAME: ${{ needs.setup.outputs.harbor_username }}
