@@ -79,10 +79,10 @@ jobs:
               exit 1
             fi
 
-            echo "HARBOR_PROJECT=$HARBOR_PROJECT" >> $GITHUB_ENV
-            echo "HARBOR_USERNAME=$HARBOR_USERNAME" >> $GITHUB_ENV
-            echo "HARBOR_PASSWORD=$HARBOR_PASSWORD" >> $GITHUB_ENV
-            echo "HARBOR_HOST=$HARBOR_HOST" >> $GITHUB_ENV
+            echo "::add-mask::HARBOR_PROJECT=$HARBOR_PROJECT" >> $GITHUB_ENV
+            echo "::add-mask::HARBOR_USERNAME=$HARBOR_USERNAME" >> $GITHUB_ENV
+            echo "::add-mask::HARBOR_PASSWORD=$HARBOR_PASSWORD" >> $GITHUB_ENV
+            echo "::add-mask::HARBOR_HOST=$HARBOR_HOST" >> $GITHUB_ENV
 
       - name: Docker Login
         run: |
