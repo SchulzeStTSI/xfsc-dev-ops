@@ -36,6 +36,8 @@ jobs:
       CI_COMMIT_TAG: ${{ github.event.release.tag_name || '' }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Set IMAGE_TAG
         id: set-tag
         run: |
