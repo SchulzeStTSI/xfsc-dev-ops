@@ -1,10 +1,7 @@
 name: Deploy Helm Chart (Org Workflow)
 
 on:
-  push:
-    branches: [main]
-    tags: ['v*.*.*']
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   helm-deploy:
