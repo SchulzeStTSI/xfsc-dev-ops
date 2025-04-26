@@ -11,7 +11,7 @@ on:
 
 jobs:
   setup:
-    uses: eclipse-xfsc/dev-ops/.github/workflows/build-context.yml@main
+    uses: SchulzeStZSI/xfsc-dev-ops/.github/workflows/build-context.yml@main
     secrets: inherit
 
   helm-push:
