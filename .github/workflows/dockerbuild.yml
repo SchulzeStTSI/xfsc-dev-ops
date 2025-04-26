@@ -80,9 +80,9 @@ jobs:
               exit 1
             fi
 
-            echo $HARBOR_PROJECT >> $GITHUB_ENV
-            echo $HARBOR_USERNAME >> $GITHUB_ENV
-            echo $HARBOR_PASSWORD >> $GITHUB_ENV
+            echo "$HARBOR_PROJECT" >> $GITHUB_ENV
+            echo "$HARBOR_USERNAME" >> $GITHUB_ENV
+            echo "$HARBOR_PASSWORD" >> $GITHUB_ENV
 
       - name: Docker Login
         run: |
