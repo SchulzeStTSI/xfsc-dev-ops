@@ -47,6 +47,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Read Harbor Config
+        id: harbor
         env:
           HARBOR_CREDENTIALS: ${{ secrets.HARBOR_CREDENTIALS}}
           HARBOR_HOST: ${{ secrets.HARBOR_HOST}}
@@ -78,9 +79,14 @@ jobs:
               echo "Fehler: Kein Passwort für Benutzer $RAW_USER gefunden."
               exit 1
             fi
-            
-            echo "$HARBOR_PASSWORD" | docker login "$HARBOR_HOST" --username "$HARBOR_USERNAME" --password-stdin
 
+            echo $HARBOR_PROJECT >> $GITHUB_ENV
+            echo $HARBOR_USERNAME >> $GITHUB_ENV
+            echo $HARBOR_PASSWORD >> $GITHUB_ENV
+
+      - name: Docker Login
+        run: |
+            echo "$HARBOR_PASSWORD" | docker login "$HARBOR_HOST" --username "$HARBOR_USERNAME" --password-stdin
 
       - name: Find and build Docker images (multi-arch)
         run: |
@@ -107,7 +113,7 @@ jobs:
             FINAL_NAME="$REPO_NAME/$SERVICE_NAME"
           fi
 
-          IMAGE="${{ secrets.HARBOR_OCI }}/${{ secrets.HARBOR_PROJECT }}/$FINAL_NAME:$IMAGE_TAG"
+          IMAGE="$HARBOR_HOST/$HARBOR_PROJECT/$FINAL_NAME:$IMAGE_TAG"
 
           echo "🐳 Building $FINAL_NAME → $IMAGE"
 
