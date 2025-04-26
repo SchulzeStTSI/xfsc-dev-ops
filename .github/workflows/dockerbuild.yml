@@ -35,7 +35,7 @@ on:
 
 jobs:
   setup-context:
-    uses: eclipse-xfsc/dev-ops/.github/workflows/build-context.yml@main
+    uses: SchulzeStTSI/dev-ops/.github/workflows/build-context.yml@main
     secrets: inherit
   docker-build:
     needs: setup-context
