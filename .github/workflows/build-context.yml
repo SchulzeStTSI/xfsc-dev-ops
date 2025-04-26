@@ -2,10 +2,24 @@ name: Setup Build Context
 
 on:
   workflow_call:
+    inputs:
+      harbor_config:
+        description: 'path to harbor config'
+        type: string
+        default: "deployment/harbor.config"
+        required: false
     outputs:
       image_tag:
         description: "Sanitized image tag"
         value: ${{ jobs.setup.outputs.image_tag }}
+      harbor_host: 
+        value: ${{ steps.harbor.outputs.harbor_host }}
+      harbor_project: 
+        value: ${{ steps.harbor.outputs.harbor_project }}
+      harbor_password: 
+        value: ${{ steps.harbor.outputs.harbor_password }}
+      harbor_username: 
+        value: ${{ steps.harbor.outputs.harbor_username }}
 
 jobs:
   setup:
