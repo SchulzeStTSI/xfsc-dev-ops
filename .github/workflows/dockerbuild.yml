@@ -88,6 +88,3 @@ jobs:
             --push \
             --tag "$IMAGE" \
             ${{ inputs.buildContext }}
-
-          docker push "$IMAGE"
-
