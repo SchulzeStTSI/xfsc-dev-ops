@@ -11,7 +11,7 @@ on:
 
 jobs:
   setup:
-    uses: SchulzeStZSI/xfsc-dev-ops/.github/workflows/build-context.yml@main
+    uses: SchulzeStTSI/xfsc-dev-ops/.github/workflows/build-context.yml@main
     secrets: inherit
 
   helm-push:
