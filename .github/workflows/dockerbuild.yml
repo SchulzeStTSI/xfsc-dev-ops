@@ -34,11 +34,11 @@ on:
         required: false
 
 jobs:
-  setup-context:
+  setup:
     uses: SchulzeStTSI/xfsc-dev-ops/.github/workflows/build-context.yml@main
     secrets: inherit
   docker-build:
-    needs: setup-context
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -47,14 +47,14 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Find and build Docker images (multi-arch)
         env: 
-          HARBOR_HOST: ${{ steps.setup.outputs.harbor_host }}
-          HARBOR_PROJECT: ${{ steps.setup.outputs.harbor_project }}
-          HARBOR_PASSWORD: ${{ steps.setup.outputs.harbor_password }}
-          HARBOR_USERNAME: ${{ steps.setup.outputs.harbor_username }}
-        run: |        
+          HARBOR_HOST: ${{ needs.setup.outputs.harbor_host }}
+          HARBOR_PROJECT: ${{ needs.setup.outputs.harbor_project }}
+          HARBOR_PASSWORD: ${{ needs.setup.outputs.harbor_password }}
+          HARBOR_USERNAME: ${{ needs.setup.outputs.harbor_username }}
+        run: |   
           echo "$HARBOR_PASSWORD" | docker login "$HARBOR_HOST" --username "$HARBOR_USERNAME" --password-stdin
           
-          IMAGE_TAG="${{ needs.setup-context.outputs.image_tag }}"
+          IMAGE_TAG="${{ needs.setup.outputs.image_tag }}"
           PLATFORMS="${{ inputs.platforms }}"
           echo "🔖 Tag: $IMAGE_TAG"
           echo "🧬 Platforms: $PLATFORMS"
