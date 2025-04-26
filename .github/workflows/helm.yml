@@ -43,6 +43,7 @@ jobs:
           CHART_DIR="${{ inputs.buildContext}}"
           cd "$CHART_DIR"
           echo "Build Dependencies"
+          tree
           # Helm Dependency Build
           helm dependency build
           echo "Build Chart"
