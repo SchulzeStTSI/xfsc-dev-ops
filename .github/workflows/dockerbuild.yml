@@ -61,8 +61,8 @@ jobs:
 
       - name: Docker login to Harbor
         run: |
-          echo "${{ secrets.HARBOR_PASSWORD }}" | docker login "${{ secrets.HARBOR_OCI }}" \
-            --username "${{ secrets.HARBOR_USERNAME }}" \
+          echo "$HARBOR_PASSWORD" | docker login "$HARBOR_HOST" \
+            --username "$HARBOR_USERNAME" \
             --password-stdin
 
       - name: Find and build Docker images (multi-arch)
