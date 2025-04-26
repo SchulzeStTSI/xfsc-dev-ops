@@ -40,9 +40,9 @@ jobs:
             --username "$HARBOR_USERNAME" \
             --password "$HARBOR_PASSWORD"
   
-          CHART_DIR="${{ inputs.buildContext }}"
+          CHART_DIR="${{ inputs.buildContext}}"
           cd "$CHART_DIR"
-      
+          tree
           # Helm Dependency Build
           helm dependency build
       
