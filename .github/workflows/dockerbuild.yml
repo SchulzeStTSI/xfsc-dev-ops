@@ -43,53 +43,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Read Harbor Config
-        env:
-          HARBOR_CREDENTIALS: ${{ secrets.HARBOR_CREDENTIALS}}
-          HARBOR_HOST: ${{ secrets.HARBOR_HOST}}
-        run: |
-            CONFIG_FILE=${{ inputs.harbor_config }}
-            while IFS='=' read -r key value; do
-              case "$key" in
-                PROJECT)
-                  export HARBOR_PROJECT="$value"
-                  ;;
-                USER)
-                  RAW_USER="$value"  # Merken ohne robot$
-                  export HARBOR_USERNAME="robot\$${value}" 
-                  ;;
-              esac
-            done < "$CONFIG_FILE"
-            
-            if [[ -z "$HARBOR_CREDENTIALS" ]]; then
-              echo "Fehler: HARBOR_CREDENTIALS ist nicht gesetzt."
-              exit 1
-            fi
-            
-            DECODED_JSON=$(echo "$HARBOR_CREDENTIALS" | base64 -d)
-            
-            HARBOR_PASSWORD=$(echo "$DECODED_JSON" | jq -r --arg user "$RAW_USER" '.[$user]')
-            
-            # Fehlerbehandlung: Falls Passwort leer oder null ist
-            if [[ -z "$HARBOR_PASSWORD" || "$HARBOR_PASSWORD" == "null" ]]; then
-              echo "Fehler: Kein Passwort für Benutzer $RAW_USER gefunden."
-              exit 1
-            fi
-
-            echo "::add-mask::HARBOR_PROJECT=$HARBOR_PROJECT" >> $GITHUB_ENV
-            echo "::add-mask::HARBOR_USERNAME=$HARBOR_USERNAME" >> $GITHUB_ENV
-            echo "::add-mask::HARBOR_PASSWORD=$HARBOR_PASSWORD" >> $GITHUB_ENV
-            echo "::add-mask::HARBOR_HOST=$HARBOR_HOST" >> $GITHUB_ENV
-
-      - name: Docker Login
-        run: |
-            echo "$HARBOR_PASSWORD" | docker login "$HARBOR_HOST" --username "$HARBOR_USERNAME" --password-stdin
-
       - name: Find and build Docker images (multi-arch)
-        run: |
+        env: 
+          HARBOR_HOST: ${{ steps.harbor.outputs.harbor_host }}
+          HARBOR_PROJECT: ${{ steps.harbor.outputs.harbor_project }}
+          HARBOR_PASSWORD: ${{ steps.harbor.outputs.harbor_password }}
+          HARBOR_USERNAME: ${{ steps.harbor.outputs.harbor_username }}
+        run: |        
+          echo "$HARBOR_PASSWORD" | docker login "$HARBOR_HOST" --username "$HARBOR_USERNAME" --password-stdin
+          
           IMAGE_TAG="${{ needs.setup-context.outputs.image_tag }}"
           PLATFORMS="${{ inputs.platforms }}"
           echo "🔖 Tag: $IMAGE_TAG"
