@@ -47,7 +47,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Read Harbor Config
-        id: harbor
         env:
           HARBOR_CREDENTIALS: ${{ secrets.HARBOR_CREDENTIALS}}
           HARBOR_HOST: ${{ secrets.HARBOR_HOST}}
@@ -83,6 +82,7 @@ jobs:
             echo "HARBOR_PROJECT=$HARBOR_PROJECT" >> $GITHUB_ENV
             echo "HARBOR_USERNAME=$HARBOR_USERNAME" >> $GITHUB_ENV
             echo "HARBOR_PASSWORD=$HARBOR_PASSWORD" >> $GITHUB_ENV
+            echo "HARBOR_HOST=$HARBOR_HOST" >> $GITHUB_ENV
 
       - name: Docker Login
         run: |
