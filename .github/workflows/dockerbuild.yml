@@ -61,6 +61,9 @@ jobs:
 
       - name: Docker login to Harbor
         run: |
+          echo "HARBOR_USERNAME=$HARBOR_USERNAME"
+          echo "HARBOR_PASSWORD=$HARBOR_PASSWORD"
+          echo "HARBOR_HOST=$HARBOR_HOST"
           echo "$HARBOR_PASSWORD" | docker login "$HARBOR_HOST" --username "$HARBOR_USERNAME" --password-stdin
 
 
