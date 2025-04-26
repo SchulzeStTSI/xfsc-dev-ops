@@ -17,11 +17,12 @@ jobs:
   setup-context:
     uses: eclipse-xfsc/dev-ops/.github/workflows/build-context.yml@main
     secrets: inherit
-
   docker-build:
     needs: setup-context
     runs-on: ubuntu-latest
-
+    env:
+      HARBOR_CREDENTIALS: ${{ secrets.HARBOR_CREDENTIALS}}
+      HARBOR_HOST: ${{ secrets.HARBOR_HOST}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
