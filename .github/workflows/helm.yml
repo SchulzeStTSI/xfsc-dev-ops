@@ -36,9 +36,10 @@ jobs:
           HARBOR_PASSWORD: ${{ needs.setup.outputs.harbor_password }}
           HARBOR_USERNAME: ${{ needs.setup.outputs.harbor_username }}
         run: |
-          echo "$HARBOR_PASSWORD" | helm registry login "$HARBOR_HOST" \
+          helm registry login "$HARBOR_HOST" \
             --username "$HARBOR_USERNAME" \
-            --password-stdin
+            --password "$HARBOR_PASSWORD"
+  
           CHART_DIR="${{ inputs.buildContext }}"
           cd "$CHART_DIR"
       
