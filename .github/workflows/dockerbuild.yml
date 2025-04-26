@@ -30,6 +30,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Read Harbor Config
         run: |
+            CONFIG_FILE="deployment/harbor.config"
             while IFS='=' read -r key value; do
               case "$key" in
                 PROJECT)
