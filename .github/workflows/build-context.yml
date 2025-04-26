@@ -12,7 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.set-tag.outputs.image_tag }}
-
+      harbor_host: ${{ steps.harbor.outputs.harbor_host }}
+      harbor_project: ${{ steps.harbor.outputs.harbor_project }}
+      harbor_password: ${{ steps.harbor.outputs.harbor_password }}
+      harbor_username: ${{ steps.harbor.outputs.harbor_username }}
     env:
       CI_DEFAULT_BRANCH: 'main'
       CI_COMMIT_REF_NAME: ${{ github.ref_name }}
