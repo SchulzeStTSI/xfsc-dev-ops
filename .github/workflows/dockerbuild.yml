@@ -51,6 +51,7 @@ jobs:
           HARBOR_CREDENTIALS: ${{ secrets.HARBOR_CREDENTIALS}}
           HARBOR_HOST: ${{ secrets.HARBOR_HOST}}
         run: |
+            tree
             CONFIG_FILE= ${{ inputs.harbor_config }}
             while IFS='=' read -r key value; do
               case "$key" in
