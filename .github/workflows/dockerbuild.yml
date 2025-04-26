@@ -28,10 +28,35 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Test
+      - name: Read Harbor Config
         run: |
-            tree
-            cat ./github/harbor.config
+            while IFS='=' read -r key value; do
+              case "$key" in
+                PROJECT)
+                  export HARBOR_PROJECT="$value"
+                  ;;
+                USER)
+                  RAW_USER="$value"  # Merken ohne robot$
+                  export HARBOR_USERNAME="robot\$${value}"  # Setze mit robot$ Präfix
+                  ;;
+              esac
+            done < "$CONFIG_FILE"
+            
+            if [[ -z "$HARBOR_CREDENTIALS" ]]; then
+              echo "Fehler: HARBOR_CREDENTIALS ist nicht gesetzt."
+              exit 1
+            fi
+            
+            DECODED_JSON=$(echo "$HARBOR_CREDENTIALS" | base64 -d)
+            
+            HARBOR_PASSWORD=$(echo "$DECODED_JSON" | jq -r --arg user "$RAW_USER" '.[$user]')
+            
+            # Fehlerbehandlung: Falls Passwort leer oder null ist
+            if [[ -z "$HARBOR_PASSWORD" || "$HARBOR_PASSWORD" == "null" ]]; then
+              echo "Fehler: Kein Passwort für Benutzer $RAW_USER gefunden."
+              exit 1
+            fi
+
       - name: Docker login to Harbor
         run: |
           echo "${{ secrets.HARBOR_PASSWORD }}" | docker login "${{ secrets.HARBOR_OCI }}" \
